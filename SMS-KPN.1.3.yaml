@@ -1,0 +1,141 @@
+swagger: "2.0"
+info:
+  description: "Send SMS through KPN network.\n## [Source view](https://app.swaggerhub.com/apis/kpn/sms-kpn/)<br/> [Documentation view](https://app.swaggerhub.com/apis-docs/kpn/sms-kpn/)\n---\n## [KPN API Store](https://developer.kpn.com/)<br/> [Getting Started](https://developer.kpn.com/getting-started)\n---\n## HTTP headers for quota and access control\n  \n\n<table width=\"100%\" cellspacing=\"5\" cellpadding=\"5px\" border=\"0\">\n    <tr bgcolor=\"#99cc00\">\n       <th>&nbsp; Quota parameter</th>\n       <th>Description</th>\n    <tr>\n       <td width=\"25%\">&nbsp; sunset </td>\n       <td>Indicates that URI is likely to become unresponsive at a point in the future.</td>\n    </tr>\n    <tr bgcolor=\"#f3f3f3\">\n       <td>&nbsp; api-version</td>\n       <td>This is usually the same version as the partner's API version.</td>\n    </tr>\n    <tr>\n       <td>&nbsp; quota-limit</td>\n       <td>Number of API calls an App or user can make within a given time period. <br>If this limit is exceeded, the app or user will be throttled and API requests will fail.</td>\n    </tr>\n    <tr bgcolor=\"#f3f3f3\">\n       <td>&nbsp;quota-interval</td>\n       <td>Used to specify an integer (for example, 1, 2, 5, 60, and so on) that will be paired with the <code>time-unit</code> you specify (minute, hour, day, week, or month) to determine a time period during which calculates quota use. <br>For example, an interval of 24 with a <code>time-unit</code> time-unit of hour means that the quota will be calculated over the course of 24 hours.</td>\n   </tr>\n    <tr>\n       <td>&nbsp; quota-time-unit</td>\n       <td>Used to specify the unit of time applicable to the quota. <br>For example, an interval of 24 with a <code>time-unit</code> of hour means that the quota will be calculated over the course of 24 hours.</td>\n    </tr>\n    <tr bgcolor=\"#f3f3f3\">\n       <td>&nbsp; quota-used</td>\n       <td>Number of API calls made within the quota.</td>\n    </tr>\n    <tr>\n       <td>&nbsp; quota-reset-UTC</td>\n       <td>All quota times are set to the Coordinated Universal Time (UTC) time zone.</td>\n    </tr>\n    <tr height=\"1\" border=\"1\" bgcolor=\"#f3f3f3\">\n       <td>&nbsp; <b>Access control parameter</td>\n       <td><b>Description</td>\n    </tr>\n    <tr bgcolor=\"#ffffff\">\n       <td>&nbsp; Access-Control-Allow-Credentials  </td>\n       <td>Tells browsers whether to expose the response to frontend JavaScript code when the request's credentials mode (<code>Request.credentials</code>) is <code>include</code>. <br>When a request's credentials mode (<code>Request.credentials</code>) is <code>include</code>, browsers will only expose the response to frontend JavaScript code if the Access-Control-Allow-Credentials value is <code>true</code>. Boolean.</td>\n    </tr>\n    <tr bgcolor=\"#f3f3f3\">\n       <td>&nbsp; Access-Control-Allow-Origin</td>\n       <td>Indicates whether the response can be shared with requesting code from the given origin.</td>\n    </tr>\n    <tr bgcolor=\"#ffffff\">\n       <td>&nbsp; Access-Control-Allow-Headers</td>\n       <td>Used in response to a pre-flight request which includes the Access-Control-Request-Headers to indicate which HTTP headers can be used during the actual request.</td>\n    </tr>\n    <tr bgcolor=\"#f3f3f3\">\n       <td>&nbsp; Access-Control-Max-Age  </td>\n       <td>Indicates how long the results of a pre-flight request (that is the information contained in the Access-Control-Allow-Methods and Access-Control-Allow-Headers headers) can be cached.</td>\n    </tr>\n    <tr bgcolor=\"#ffffff\">\n       <td>&nbsp; Access-Control-Allow-Methods  </td>\n       <td>Indicates which HTTP methods are allowed on a particular endpoint for cross-origin requests. <br>If all HTTP methods are allowed, then it's OK to set the value to something like Access-Control-Allow-Methods: GET, PUT, POST, DELETE, HEAD.</td>\n    </tr>\n</table>\n\n\n ---"
+  version: 1.3_table 
+  title: SMS - KPN 
+  termsOfService: https://developer.kpn.com/legal 
+  contact:
+    name: API Support
+    url: https://developer.kpn.com/support
+    email: api_developer@kpn.com
+host: api-prd.kpn.com
+basePath: /messaging/sms-kpn/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /send:
+    post:
+      summary: Send single SMS
+      description: Sends one SMS to one recipient. Bulk messaging will be added in the future.
+      operationId: Send Single SMS
+      parameters:
+      - in: body
+        name: body
+        description: SmsKpn object
+        required: true
+        schema:
+          $ref: '#/definitions/SmsKpn'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/SmsKpnSendResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ApiErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ApiErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ApiErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ApiErrorResponse'
+        "500":
+          description: Server Error
+          schema:
+            $ref: '#/definitions/ApiErrorResponse'
+      security:
+      - OAuth2: []
+securityDefinitions:
+  OAuth2:
+    type: oauth2
+    tokenUrl: https://api-prd.kpn.com/oauth/client_credential/accesstoken?grant_type=client_credentials
+    flow: application
+definitions:
+  SmsKpn:
+    type: object
+    properties:
+      messages:
+        type: array
+        description: There should only be one item in the messages array. Bulk messaging will be added in the future.
+        items:
+          $ref: '#/definitions/SmsKpn_messages'
+        maxItems: 1
+        minItems: 1
+      sender:
+        type: string
+        example: KPN API
+        description: Default value will be KPN. Sender name or short code is allowed. This string can have a maximum length of 11 characters.
+        title: Sender
+        default: KPN
+    example:
+      sender: KPN API
+      messages:
+      - mobile_number: 06xxxxxxxx or +316xxxxxxxx
+        content: Hi from KPN!
+  SmsKpnSendResponse:
+    type: object
+    properties:
+      document_id:
+        type: string
+        example: b4e905d4-774c-4c83-8360-01427e17a33a
+        description: Unique tracking ID for this message.
+        title: Document Id
+      status:
+        type: string
+        example: OK
+        description: If document id is present in the response, then the request succeeded else there was an issue.
+        title: Status
+    example:
+      document_id: b4e905d4-774c-4c83-8360-01427e17a33a
+      status: OK
+  ApiErrorResponse:
+    type: object
+    properties:
+      errorResponse:
+        $ref: '#/definitions/ApiErrorResponse_errorResponse'
+  SmsKpn_messages:
+    required:
+    - content
+    - mobile_number
+    properties:
+      content:
+        type: string
+        example: Hi from KPN!
+        description: Content to be send to the recipient.
+        title: Content
+      mobile_number:
+        type: string
+        example: 06xxxxxxxx or +316xxxxxxxx
+        description: 'Only valid NL phone numbers are allowed and in any valid NL format. Also 097 range is allowed. Note: 060xxxxxxx, 067xxxxxxx and 069xxxxxxx are not valid mobile number ranges.'
+        title: Mobile number
+    example:
+      mobile_number: 06xxxxxxxx or +316xxxxxxxx
+      content: Hi from KPN!
+  ApiErrorResponse_errorResponse:
+    properties:
+      code:
+        type: string
+        example: Status codes possible 401, 403, 404, 500
+        description: Status Code
+        title: Code
+      message:
+        type: string
+        example: eq. internal server error
+        description: Message describing the error
+        title: Error Message
+      info:
+        type: string
+        example: eq. for additional information look at https://developer.kpn.com
+        description: Additional information about error
+        title: Info
