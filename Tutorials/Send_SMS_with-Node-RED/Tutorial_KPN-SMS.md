@@ -23,7 +23,7 @@ If you don't want to build the flow yourself you can download it directly from G
 ## Overview
 
 <!--a ![Node-RED flow example](/sites/default/files/Send_SMS_with_Node-RED_flow.png)/a-->
-![Node-RED flow example](https://github.com/kpnapistore/SMS-KPN/tree/master/Tutorials/Send_SMS_with-Node-RED/Send_SMS_with_Node-RED_flow.png)
+![Node-RED flow example](Send_SMS_with_Node-RED_flow.png)
 
 
 </br>
