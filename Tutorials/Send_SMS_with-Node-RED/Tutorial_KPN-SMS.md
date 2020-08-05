@@ -12,7 +12,7 @@ Node-RED is a programming tool for wiring together hardware devices, APIs and on
 
 You will build a flow consisting of two parts:
 
-1. In the first part flow you obtain an access token from the KPN Authorization API (OAuth flow).
+1. In the first part flow you obtain an access token from the KPN Authorization API (Authorization flow).
 2. In the second and you send an SMS using the `POST /send` endpoint of the KPN SMS API.
 
 If you don't want to build the flow yourself you can download it directly from GitHub and import it into you own Node-RED environment. 
@@ -82,7 +82,7 @@ The flow is imported into a new editor tab.
 
 ## Using nodes
 
-For the OAuth flow to obtain an access token you'll need the following nodes:
+For the Authorization flow to obtain an access token you'll need the following nodes:
 
 1. `inject`
 2. `credentials`
@@ -129,12 +129,12 @@ Define two values:
 
 Value | private | to
 ---------|----------|---------
- Value 1|  `msg.client_id` | Paste your `client_id` from My API Store.
- Value 2 | `msg.client_secret` | Paste your `client_secret` from My API Store.
+ Value 1| Enter your `client_id` from My API Store.  | `msg.client_id` 
+ Value 2 |  Enter your `client_secret` from My API Store. | `msg.client_secret` 
 
  </br>
 
-Set `Name` to a distinctive name, for example: `KPN API Store credentials`. Click **Done** when you have finished.
+Set `Name` to a distinctive name, for example: `Set credentials`. Click **Done** when you have finished.
 
 Connect the `inject` node with the `credentials` node.
 
@@ -172,7 +172,7 @@ Then connect the `credentials` node with the `function` node.
 
 </br>
 
-### Configuring the OAuth request
+### Configuring the Authorization request
 
 Drag a `http request` node to the flow editor and double-click on it. The `http request` node sends HTTP requests and returns the response.
 
@@ -199,7 +199,7 @@ Drag a `debug` node to the flow editor and double-click on it.
 
 Then connect the `http request` node with the `debug` node.
 
-Click `Deploy`. The OAuth access token request flow is now complete.  
+Click `Deploy`. The Authorization flow is now complete.  
 
 To test the flow, click on the blue button of the `inject node`.
 
@@ -229,30 +229,52 @@ Now connect the `switch` node to the `change` node and to a `debug` node.
 
 </br>
 
+### Storing the telephone number
+
+To avoid storing telephone numbers in the code of the request you can use this node to store your telephone numbers. Drag the `credentials` node to the flow editor and double-click on it.
+
+Store the telephone number in the message payload `msg.mobile_number`:
+
+</br>
+
+Value | private | to
+---------|----------|---------
+ Value |  Enter the telephone number you want to store. | `msg.mobile_number`.
+
+</br>
+
+Set `Name` to a distinctive name, for example: `Set mobile number`. Click **Done** when you have finished.
+
+Connect the `inject` node with the `credentials` node.
+
+</br>
+
 ### Preparing the request body
 
-Now you'll have to add payload to the request. You can do this in a `change` node and add a some JSON code. Change nodes can set, change, delete or move properties of a message, flow context or global context.
+Now you'll have to add payload to the request. You can do this in a `function` node and add a some JSON code. Change nodes can set, change, delete or move properties of a message, flow context or global context.
 
-Drag a `change` node to the flow editor and double-click on it:
+Drag a `function` node to the flow editor and double-click on it:
 
 1. Set `Name` to a distinctive name, for example: `Set request body`.
-2. In Rules, select `Set` and `msg.json`.
-3. In `to`, select `{} JSON` and then click the three dots (`...`) on the right.
-4. Copy and paste the following code snippet into the `Edit JSON` tab of the node.
-5. Enter the mobile number of the recipient and the message content.
-6. Click **Done** when you have finished.
+2. Copy and paste the following code snippet into the `Function` tab of the node.
+3. Click **Done** when you have finished.
 
-```json
-{
+```javascript
+msg.json = `{
     "sender": "KPN API",
     "messages": [
         {
-            "mobile_number": "06xxxxxxx",
-            "content": "Add the content of the message."
+            "mobile_number": "` + msg.mobile_number +`",
+            "content": "Hi, from KPN SMS API!"
         }
     ]
-}
+}`;
+return msg;
 ```
+
+As you can see, you retrieve the mobile phone number from the message payload of the previous `credentials` node.
+
+Now connect the `credentials` node with the `function` node.
 
 </br>
 
@@ -267,11 +289,11 @@ Drag a `function` node to the flow editor and double-click on it:
 3. Click **Done** when you have finished.
 
 ```javascript
-var aggURL = "https://api-prd.kpn.com/messaging/sms-kpn/v1/send";
-var apiName = "";
+var baseURL = "https://api-prd.kpn.com/messaging/sms-kpn/v1";
+var apiEndpoint = "/send";
 
 msg.method = "POST";
-msg.url = aggURL + apiName;
+msg.url = baseURL + apiEndpoint;
 msg.headers = {};
 msg.headers.Authorization = "Bearer " + msg.payload.access_token;
 msg.headers["Content-Type"] = "application/json";

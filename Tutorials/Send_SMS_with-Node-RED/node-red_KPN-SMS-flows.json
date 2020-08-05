@@ -4,12 +4,12 @@
         "type": "function",
         "z": "b582ab7.fe81958",
         "name": "Prepare request",
-        "func": "/*\nTo use KPN APIs, an access token (also called bearer) token must first be obtained.\nThe bearer token is obtained by invoking an Authorization API (`loginAPI`) using a POST method.\nThe API payload is an object with the client credentials:\n\nclient_id\nclient_secret\n\nIf correct, the API returns a payload object that will contain a valid access token authentication in subsequest API requests.\n*/\n\n// set `loginAPI` API here:\n\nvar loginAPI = \"https://api-prd.kpn.com/oauth/client_credential/accesstoken?grant_type=client_credentials\";\n\nmsg.method = \"POST\";\nmsg.url = loginAPI;\nmsg.headers = {};\nmsg.headers[\"Content-Type\"] = \"application/x-www-form-urlencoded\";\n\n// Use your `client_id` and `client_secret` from KPN API Store.\nmsg.payload = 'client_id=' + msg.client_id + '&client_secret=' + msg.client_secret;\nreturn msg;",
+        "func": "/*\nTo use KPN APIs, an access token (also called bearer) token must first be obtained.\nThe bearer token is obtained by invoking an Authorization API (`loginAPI`) using a POST method.\nThe API payload is an object with the client credentials that were stored in the Credentials node:\n\nclient_id\nclient_secret\n\nIf correct, the API returns a payload object that will contain a valid access token authentication in subsequest API requests.\n*/\n\n// set `loginAPI` API here:\n\nvar loginAPI = \"https://api-prd.kpn.com/oauth/client_credential/accesstoken?grant_type=client_credentials\";\n\nmsg.method = \"POST\";\nmsg.url = loginAPI;\nmsg.headers = {};\nmsg.headers[\"Content-Type\"] = \"application/x-www-form-urlencoded\";\n\n// Use your `client_id` and `client_secret` from KPN API Store.\nmsg.payload = 'client_id=' + msg.client_id + '&client_secret=' + msg.client_secret;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "x": 520,
+        "x": 540,
         "y": 120,
         "wires": [
             [
@@ -31,7 +31,7 @@
         "persist": false,
         "proxy": "",
         "authType": "",
-        "x": 740,
+        "x": 760,
         "y": 120,
         "wires": [
             [
@@ -64,7 +64,7 @@
         "y": 380,
         "wires": [
             [
-                "fb3d81c5.2e593"
+                "90f0a3f2.8499a"
             ],
             [
                 "5c388bf8.d2eae4"
@@ -120,7 +120,7 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 380,
+        "x": 360,
         "y": 420,
         "wires": []
     },
@@ -128,9 +128,9 @@
         "id": "bba3e2bb.861c",
         "type": "comment",
         "z": "b582ab7.fe81958",
-        "name": "STEP 1 - OAuth flow: Obtain access token",
+        "name": "Authorization: Obtain access token",
         "info": "",
-        "x": 200,
+        "x": 180,
         "y": 60,
         "wires": []
     },
@@ -164,7 +164,7 @@
         "persist": false,
         "proxy": "",
         "authType": "",
-        "x": 830,
+        "x": 1030,
         "y": 340,
         "wires": [
             [
@@ -177,12 +177,12 @@
         "type": "function",
         "z": "b582ab7.fe81958",
         "name": "Prepare request",
-        "func": "/*\nUse Bearer token to authenticate API call.\nIn this example, we will use the \"/sms-kpn/v1/send\" API\n\nNote: The bearer token gets retrieved from the \nauthorization request: `msg.payload.access_token`\n*/\n\nvar aggURL = \"https://api-prd.kpn.com/messaging/sms-kpn/v1/send\";\nvar apiName = \"\";\n\nmsg.method = \"POST\";\nmsg.url = aggURL + apiName;\nmsg.headers = {};\nmsg.headers.Authorization = \"Bearer \" + msg.payload.access_token;\nmsg.headers[\"Content-Type\"] = \"application/json\";\n//msg.payload = null;\nmsg.payload = msg.json;\nreturn msg;",
+        "func": "/*\nUse Bearer token to authenticate API call.\nIn this example, we will use the \"/sms-kpn/v1/send\" API\n\nNote: The bearer token gets retrieved from the \nauthorization request: `msg.payload.access_token`\n*/\n\nvar baseURL = \"https://api-prd.kpn.com/messaging/sms-kpn/v1\";\nvar apiEndpoint = \"/send\";\n\nmsg.method = \"POST\";\nmsg.url = baseURL + apiEndpoint;\nmsg.headers = {};\nmsg.headers.Authorization = \"Bearer \" + msg.payload.access_token;\nmsg.headers[\"Content-Type\"] = \"application/json\";\n//msg.payload = null;\nmsg.payload = msg.json;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "x": 620,
+        "x": 820,
         "y": 340,
         "wires": [
             [
@@ -205,36 +205,9 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1050,
-        "y": 340,
+        "x": 1090,
+        "y": 420,
         "wires": []
-    },
-    {
-        "id": "fb3d81c5.2e593",
-        "type": "change",
-        "z": "b582ab7.fe81958",
-        "name": "Set request body",
-        "rules": [
-            {
-                "t": "set",
-                "p": "json",
-                "pt": "msg",
-                "to": "{\"sender\":\"KPN API\",\"messages\":[{\"mobile_number\":\"0624577981\",\"content\":\"Hi from the UK and my KPN SMS production account! Now with credentials in a separate node.\"}]}",
-                "tot": "json"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 410,
-        "y": 340,
-        "wires": [
-            [
-                "aa3c06a9.646f98"
-            ]
-        ]
     },
     {
         "id": "e5e08a19.a16f98",
@@ -249,7 +222,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 640,
+        "x": 820,
         "y": 420,
         "wires": []
     },
@@ -257,9 +230,9 @@
         "id": "fd0f11f6.004e6",
         "type": "comment",
         "z": "b582ab7.fe81958",
-        "name": "STEP 2 -  API request flow: Send SMS",
+        "name": "API request: Send SMS",
         "info": "",
-        "x": 190,
+        "x": 140,
         "y": 240,
         "wires": []
     },
@@ -267,7 +240,7 @@
         "id": "ef66c0ab.c22c8",
         "type": "credentials",
         "z": "b582ab7.fe81958",
-        "name": "Credentials",
+        "name": "Set credentials",
         "props": [
             {
                 "value": "client_id",
@@ -278,11 +251,48 @@
                 "type": "msg"
             }
         ],
-        "x": 330,
+        "x": 340,
         "y": 120,
         "wires": [
             [
                 "84dbf2e2.074ae"
+            ]
+        ]
+    },
+    {
+        "id": "90f0a3f2.8499a",
+        "type": "credentials",
+        "z": "b582ab7.fe81958",
+        "name": "Set mobile number",
+        "props": [
+            {
+                "value": "mobile_number",
+                "type": "msg"
+            }
+        ],
+        "x": 390,
+        "y": 340,
+        "wires": [
+            [
+                "a0ec767d.c61888"
+            ]
+        ]
+    },
+    {
+        "id": "a0ec767d.c61888",
+        "type": "function",
+        "z": "b582ab7.fe81958",
+        "name": "Set request body",
+        "func": "/*\nTo make sure that personal details are not made public we retrieve \nthe mobile phone number that was stored in the Credentials node \nand add it to the JSON body of the API request. \n*/\n\nmsg.json = `{\n    \"sender\": \"KPN API\",\n    \"messages\": [\n        {\n            \"mobile_number\": \"` + msg.mobile_number +`\",\n            \"content\": \"Hi, from KPN SMS API!\"\n        }\n    ]\n}`;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 610,
+        "y": 340,
+        "wires": [
+            [
+                "aa3c06a9.646f98"
             ]
         ]
     }
