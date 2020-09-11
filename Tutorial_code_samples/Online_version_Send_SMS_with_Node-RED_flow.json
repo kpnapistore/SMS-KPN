@@ -1,0 +1,274 @@
+[
+    {
+        "id": "19d89762.5545f9",
+        "type": "tab",
+        "label": "KPN SMS - Send SMS",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "6cdd39a0.b66988",
+        "type": "http request",
+        "z": "19d89762.5545f9",
+        "name": "Access token request",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 422,
+        "y": 439,
+        "wires": [
+            [
+                "efcf8aeb.881228"
+            ]
+        ]
+    },
+    {
+        "id": "46d460d8.1d046",
+        "type": "function",
+        "z": "19d89762.5545f9",
+        "name": "Prepare request",
+        "func": "/*\nTo use KPN APIs, an access token (also called bearer) token must first be obtained.\nThe bearer token is obtained by invoking an Authorization API (`loginAPI`) using a POST method.\nThe API payload is an object with the client credentials:\n\nclient_id\nclient_secret\n\nIf correct, the API returns a payload object that will contain a valid access token authentication in subsequest API requests.\n*/\n\n// set `loginAPI` API here:\n\nvar loginAPI = \"https://api-prd.kpn.com/oauth/client_credential/accesstoken?grant_type=client_credentials\";\n\nmsg.method = \"POST\";\nmsg.url = loginAPI;\nmsg.headers = {};\nmsg.headers[\"Content-Type\"] = \"application/x-www-form-urlencoded\";\n\n// Use your `client_id` and `client_secret` from KPN API Store.\nmsg.payload = 'client_id=' + msg.client_id + '&client_secret=' + msg.client_secret;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 402,
+        "y": 379,
+        "wires": [
+            [
+                "6cdd39a0.b66988"
+            ]
+        ],
+        "info": "To use KPN APIs, an access token (also called bearer) token must first be obtained.\n\nThe bearer token is obtained by invoking an Authorization API (`loginAPI`) using a POST method.\n\nThe API payload is an object with the `client credentials`:\n* `client_id`\n* `client_secret`\n\n\nUse your `client_id` and `client_secret` from KPN API Store.\n\nIf correct, the API returns a payload object that will contain a valid access token authentication in subsequest API requests."
+    },
+    {
+        "id": "dca057ed.7596b8",
+        "type": "credentials",
+        "z": "19d89762.5545f9",
+        "name": "Set API Store credentials",
+        "props": [
+            {
+                "value": "client_id",
+                "type": "msg"
+            },
+            {
+                "value": "client_secret",
+                "type": "msg"
+            }
+        ],
+        "x": 432,
+        "y": 319,
+        "wires": [
+            [
+                "46d460d8.1d046"
+            ]
+        ]
+    },
+    {
+        "id": "efcf8aeb.881228",
+        "type": "credentials",
+        "z": "19d89762.5545f9",
+        "name": "Set SMS number and content",
+        "props": [
+            {
+                "value": "mobile_number",
+                "type": "msg"
+            },
+            {
+                "value": "content",
+                "type": "msg"
+            }
+        ],
+        "x": 750,
+        "y": 545,
+        "wires": [
+            [
+                "37e5fc09.dc8b04"
+            ]
+        ]
+    },
+    {
+        "id": "37e5fc09.dc8b04",
+        "type": "function",
+        "z": "19d89762.5545f9",
+        "name": "Set request body",
+        "func": "/*\nTo make sure that personal details are not made public we retrieve \nthe mobile phone number that was stored in the Credentials node \nand add it to the JSON body of the API request. \n*/\n\nmsg.json = `{\n    \"sender\": \"KPN API\",\n    \"messages\": [\n        {\n            \"mobile_number\": \"` + msg.mobile_number +`\",\n            \"content\": \"` + msg.content +`\"\n        }\n    ]\n}`;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 720,
+        "y": 605,
+        "wires": [
+            [
+                "18bb5382.09d79c"
+            ]
+        ]
+    },
+    {
+        "id": "18bb5382.09d79c",
+        "type": "function",
+        "z": "19d89762.5545f9",
+        "name": "Prepare request",
+        "func": "/*\nUse Bearer token to authenticate API call.\nIn this example, we will use the \"/sms-kpn/v1/send\" API\n\nNote: The bearer token gets retrieved from the \nauthorization request: `msg.payload.access_token`\n*/\n\nvar baseURL = \"https://api-prd.kpn.com/messaging/sms-kpn/v1\";\nvar apiEndpoint = \"/send\";\n\nmsg.method = \"POST\";\nmsg.url = baseURL + apiEndpoint;\nmsg.headers = {};\nmsg.headers.Authorization = \"Bearer \" + msg.payload.access_token;\nmsg.headers[\"Content-Type\"] = \"application/json\";\n//msg.payload = null;\nmsg.payload = msg.json;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 710,
+        "y": 665,
+        "wires": [
+            [
+                "d320ebf9.2986c8"
+            ]
+        ],
+        "info": "Use Bearer token from previous request in the headers to authenticate API request.\n\nNote: The bearer token gets retrieved from the payload of the previous authorization request: `msg.payload.access_token`\n"
+    },
+    {
+        "id": "d320ebf9.2986c8",
+        "type": "http request",
+        "z": "19d89762.5545f9",
+        "name": "Send SMS request",
+        "method": "use",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 720,
+        "y": 725,
+        "wires": [
+            [
+                "fa777a63.ded848"
+            ]
+        ]
+    },
+    {
+        "id": "fa777a63.ded848",
+        "type": "debug",
+        "z": "19d89762.5545f9",
+        "name": "Send SMS request result",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 1040,
+        "y": 725,
+        "wires": []
+    },
+    {
+        "id": "da4ddde6.5a63f",
+        "type": "switch",
+        "z": "19d89762.5545f9",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "else"
+            },
+            {
+                "t": "gte",
+                "v": "50",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 130,
+        "y": 180,
+        "wires": [
+            [
+                "e6a3ecb9.dac"
+            ],
+            [
+                "dca057ed.7596b8"
+            ]
+        ]
+    },
+    {
+        "id": "68575891.738718",
+        "type": "inject",
+        "z": "19d89762.5545f9",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "10",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 150,
+        "y": 60,
+        "wires": [
+            [
+                "8a41c74a.be3b48"
+            ]
+        ]
+    },
+    {
+        "id": "e6a3ecb9.dac",
+        "type": "debug",
+        "z": "19d89762.5545f9",
+        "name": "Random number output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 410,
+        "y": 173,
+        "wires": []
+    },
+    {
+        "id": "285b203a.b0c12",
+        "type": "comment",
+        "z": "19d89762.5545f9",
+        "name": "Set API Store credentials",
+        "info": "Enter your KPN API Store credentials here.",
+        "x": 716,
+        "y": 319,
+        "wires": []
+    },
+    {
+        "id": "120a4dba.d3c242",
+        "type": "comment",
+        "z": "19d89762.5545f9",
+        "name": "Set SMS number and content",
+        "info": "Enter mobile phone number and SMS content here.",
+        "x": 1050,
+        "y": 546,
+        "wires": []
+    },
+    {
+        "id": "1ecba78.79a8f59",
+        "type": "comment",
+        "z": "19d89762.5545f9",
+        "name": "Comment",
+        "info": "When the random number is 50 or above, the API request is triggered.",
+        "x": 140,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "8a41c74a.be3b48",
+        "type": "function",
+        "z": "19d89762.5545f9",
+        "name": "Generate random number",
+        "func": "msg.payload = Math.round(Math.random()*60);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 170,
+        "y": 120,
+        "wires": [
+            [
+                "da4ddde6.5a63f"
+            ]
+        ]
+    }
+]
