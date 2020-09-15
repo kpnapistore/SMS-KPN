@@ -19,8 +19,8 @@
         "persist": false,
         "proxy": "",
         "authType": "",
-        "x": 422,
-        "y": 439,
+        "x": 320,
+        "y": 380,
         "wires": [
             [
                 "efcf8aeb.881228"
@@ -35,8 +35,8 @@
         "func": "/*\nTo use KPN APIs, an access token (also called bearer) token must first be obtained.\nThe bearer token is obtained by invoking an Authorization API (`loginAPI`) using a POST method.\nThe API payload is an object with the client credentials:\n\nclient_id\nclient_secret\n\nIf correct, the API returns a payload object that will contain a valid access token authentication in subsequest API requests.\n*/\n\n// set `loginAPI` API here:\n\nvar loginAPI = \"https://api-prd.kpn.com/oauth/client_credential/accesstoken?grant_type=client_credentials\";\n\nmsg.method = \"POST\";\nmsg.url = loginAPI;\nmsg.headers = {};\nmsg.headers[\"Content-Type\"] = \"application/x-www-form-urlencoded\";\n\n// Use your `client_id` and `client_secret` from KPN API Store.\nmsg.payload = 'client_id=' + msg.client_id + '&client_secret=' + msg.client_secret;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 402,
-        "y": 379,
+        "x": 300,
+        "y": 320,
         "wires": [
             [
                 "6cdd39a0.b66988"
@@ -59,8 +59,8 @@
                 "type": "msg"
             }
         ],
-        "x": 432,
-        "y": 319,
+        "x": 320,
+        "y": 260,
         "wires": [
             [
                 "46d460d8.1d046"
@@ -82,8 +82,8 @@
                 "type": "msg"
             }
         ],
-        "x": 750,
-        "y": 545,
+        "x": 580,
+        "y": 460,
         "wires": [
             [
                 "37e5fc09.dc8b04"
@@ -98,8 +98,8 @@
         "func": "/*\nTo make sure that personal details are not made public we retrieve \nthe mobile phone number that was stored in the Credentials node \nand add it to the JSON body of the API request. \n*/\n\nmsg.json = `{\n    \"sender\": \"KPN API\",\n    \"messages\": [\n        {\n            \"mobile_number\": \"` + msg.mobile_number +`\",\n            \"content\": \"` + msg.content +`\"\n        }\n    ]\n}`;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 720,
-        "y": 605,
+        "x": 570,
+        "y": 520,
         "wires": [
             [
                 "18bb5382.09d79c"
@@ -114,8 +114,8 @@
         "func": "/*\nUse Bearer token to authenticate API call.\nIn this example, we will use the \"/sms-kpn/v1/send\" API\n\nNote: The bearer token gets retrieved from the \nauthorization request: `msg.payload.access_token`\n*/\n\nvar baseURL = \"https://api-prd.kpn.com/messaging/sms-kpn/v1\";\nvar apiEndpoint = \"/send\";\n\nmsg.method = \"POST\";\nmsg.url = baseURL + apiEndpoint;\nmsg.headers = {};\nmsg.headers.Authorization = \"Bearer \" + msg.payload.access_token;\nmsg.headers[\"Content-Type\"] = \"application/json\";\n//msg.payload = null;\nmsg.payload = msg.json;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 710,
-        "y": 665,
+        "x": 560,
+        "y": 580,
         "wires": [
             [
                 "d320ebf9.2986c8"
@@ -136,8 +136,8 @@
         "persist": false,
         "proxy": "",
         "authType": "",
-        "x": 720,
-        "y": 725,
+        "x": 570,
+        "y": 640,
         "wires": [
             [
                 "fa777a63.ded848"
@@ -155,8 +155,8 @@
         "tostatus": false,
         "complete": "true",
         "targetType": "full",
-        "x": 1040,
-        "y": 725,
+        "x": 810,
+        "y": 640,
         "wires": []
     },
     {
@@ -198,11 +198,11 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "repeat": "10",
+        "repeat": "",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "x": 150,
+        "x": 160,
         "y": 60,
         "wires": [
             [
@@ -221,7 +221,7 @@
         "tostatus": false,
         "complete": "payload",
         "targetType": "msg",
-        "x": 410,
+        "x": 330,
         "y": 173,
         "wires": []
     },
@@ -231,8 +231,8 @@
         "z": "19d89762.5545f9",
         "name": "Set API Store credentials",
         "info": "Enter your KPN API Store credentials here.",
-        "x": 716,
-        "y": 319,
+        "x": 590,
+        "y": 260,
         "wires": []
     },
     {
@@ -241,18 +241,18 @@
         "z": "19d89762.5545f9",
         "name": "Set SMS number and content",
         "info": "Enter mobile phone number and SMS content here.",
-        "x": 1050,
-        "y": 546,
+        "x": 840,
+        "y": 460,
         "wires": []
     },
     {
         "id": "1ecba78.79a8f59",
         "type": "comment",
         "z": "19d89762.5545f9",
-        "name": "Comment",
+        "name": "Click the button on the left of the timestamp node to trigger a random number",
         "info": "When the random number is 50 or above, the API request is triggered.",
-        "x": 140,
-        "y": 220,
+        "x": 350,
+        "y": 20,
         "wires": []
     },
     {
@@ -263,12 +263,32 @@
         "func": "msg.payload = Math.round(Math.random()*60);\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 170,
+        "x": 190,
         "y": 120,
         "wires": [
             [
                 "da4ddde6.5a63f"
             ]
         ]
+    },
+    {
+        "id": "a312c650.5de148",
+        "type": "comment",
+        "z": "19d89762.5545f9",
+        "name": "Click Deploy (top right) to save the changes to the flows",
+        "info": " Deploy allows you to launch the flows on \n the FRED server.\n \n You can switch between the info and debug\n tabs to the right of the flows. Info shows\n node information and debug is output from\n debug nodes.\n \nSelect info and then click on a node in a flow\nyou'll see info on the node",
+        "x": 940,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "3d1fbb0a.cdd754",
+        "type": "comment",
+        "z": "19d89762.5545f9",
+        "name": "Select the Debug messages window in the sidebar",
+        "info": "",
+        "x": 930,
+        "y": 180,
+        "wires": []
     }
 ]
