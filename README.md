@@ -1,5 +1,5 @@
 # SMS-KPN
-Send SMS through KPN network.
+Send SMS through the KPN network.
 
 In this repository you can find:
 
